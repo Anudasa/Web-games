@@ -28,21 +28,30 @@ function checkVictory(board, lastMove) {
     return false;
 }
 
+function checkDraw() {
+    if (board.every(cell => cell !== null)) {
+        setTimeout(() => clearBoard(), 3000);
+    }
+}
+
 function declareVictory(lastMove, winningCells) {
     players[lastMove].score += 1;
 
     flash(winningCells, 'success');
-    CurrentMove = 1
+    CurrentMove = 0
     players = [players[1], players[0]];
 
     updateHeadings();
-    setTimeout(() => clearBoard(), 3000);
+    disableBoard();
+    setTimeout(() => {
+        clearBoard();
+        enableBoard();
+    }, 3000);
 }
 
 
 function handleClick(index) {
     if (board[index] !== null) {
-        console.log('cell taken, flashing red');
         flash(index, 'error');
         return;
     }
@@ -51,7 +60,8 @@ function handleClick(index) {
     board[index] = lastMove;
     
     paintCell(index, lastMove);
-    checkVictory(board, lastMove);
+    if (checkVictory(board, lastMove)) return;
+    checkDraw();
 
     if(CurrentMove === 0){
         CurrentMove = 1}
@@ -66,6 +76,18 @@ function flash(indices, color) {
     setTimeout(() => {
         indices.forEach(index => cells[index].classList.remove(color));
     }, 1200);
+}
+
+function highlightCurrentPlayer(currentMove) {
+    const panel1 = document.querySelectorAll('.side-panel')[0];
+    const panel2 = document.querySelectorAll('.side-panel')[1];
+    if (currentMove === 0) {
+        panel1.style.backgroundColor = '';
+        panel2.style.backgroundColor = '#2ecc71';
+    } else {
+        panel2.style.backgroundColor = '';
+        panel1.style.backgroundColor = '#2ecc71';
+    }
 }
 
 function updateHeadings() {
@@ -95,6 +117,14 @@ function clearBoard() {
         cell.textContent = '';
         cell.classList.remove('cross', 'nought');
     });
+}
+
+function disableBoard() {
+    document.querySelectorAll('.btn').forEach(btn => btn.disabled = true);
+}
+
+function enableBoard() {
+    document.querySelectorAll('.btn').forEach(btn => btn.disabled = false);
 }
 
 function goToGame() {
